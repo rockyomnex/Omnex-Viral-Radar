@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "DfPCvtwAF_f", "tracker": "VIRAL POST 竞对", "competitor": "ibpogroup", "caption": "This Deepavali, we're spreading the festive cheer with 3 x RM50 Touch ‘n Go Reload PINs up for grabs! 💛 Think you know the answer to our trivia question? Join our giveaway for a chance to win! 🎁​\n​\nHow to Enter:​\n1.FOLLOW @ibpogroup on Facebook/Instagram​\n2. ANSWER the question correctly in the COMMENTS section​\n3. SHARE this post to your FB timeline or IG Stories. Don't forget to TAG us and make your profile public!​\n​\n📅 Giveaway Period: 2 – 16 November 2026​\n📍 Eligibility: Open to Malaysian citizens and residents only​\n🎉 Winners Announcement: 23 November 2026​\n🔗 Terms & Conditions: https://bit.ly/3SVYctb​\n​\nMay this Festival of Lights bring you joy, prosperity and new beginnings! 🪔✨​\n​\nLive Better with Fusion Finance!​\n​\n#IBPOGroup #GiveawayMalaysia #DeepavaliGiveaway", "transcript": "", "brk": "Hook类型: 福利诱饵\n结构: 节日问候 → 答题抽奖规则 → 公布时间及T&C\n为什么火: 低门槛的节日现金奖励（Touch 'n Go）精准吸引本地活跃用户互动。\n改编角度: 结合大马节日推出理财/贷款知识问答送现金，提升粉丝粘性与互动率。", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n很多老板一听到资金周转，就觉得只要去银行申请 business loan 就一定能批。\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n我们先 study 你的 profile，再给你建议 ya。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n【剪辑:这里放案例画面】\n例如最近成交的客户，52 岁，一开始只是问，我需要一笔贷款来做生意，可以帮我吗。\n经过深入了解，才发现他名下有几间已经供完的房子。\n于是我们帮他规划 Property Refinancing，通过现有产业套现，解决他的生意资金需求。\n以前客户遇到资金问题，往往自己去申请贷款，最后却被银行 Reject。\n现在我们可以先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "IBPOGroup, GiveawayMalaysia, DeepavaliGiveaway", "bait": false, "type": "Image", "likes": 494, "comments": 773, "er": 30.64, "followers": 4135, "date": "2026-11-02", "url": "https://www.instagram.com/p/DfPCvtwAF_f/", "video": false, "ratio": 0, "score": 68.03, "status": "未处理", "x": 85.0}, {"id": "DeOq2GPDkSs", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言【AI做图】，我发你另外30个GPT做图隐藏指令！🤫\n\n#ai #chatgpt #prompt #gpt #ai做图 #chalette", "transcript": "在签起文件上傳一張你的產品照片如果你打Stretch 3D Viewboard你就可以不用花一分錢讓你的產品出現在大型廣告牌上面如果你打Stretch Meta Ads你的Social Media廣告圖就可以直接搞定如果你打Stretch Fat Lake你就可以不用塞到場景也可以做出攝影棚級別的廣告圖片如果你打Stretch UGC Shoot你就可以不用請網紅去拍這種實拍圖自己就可以做出 UGC 產品圖如果你打Stretch 360 View你就可以直接生成屬360度旋轉的這種展示圖如果你打Stretch Loading Product你就可以做出這種雙奶碰出來產品懸浮的這種效果如果你打Stretch Lifestyle Shoot你就可以輕輕鬆鬆把你的產品圖片變成這種 Pinterest 氛圍感的照片如果你在評論區打出AI 作圖我就把我另外30個的AI 作圖影長Prom直接發給你", "brk": "Hook类型: 痛点直击\n结构: 痛点引入 → 密集干货展示 → 评论区引导留资\n为什么火: 免费且高效解决商业痛点，精准指令直击搞钱降本需求\n改编角度: 分享3个银行或理财APP的隐藏高频功能，帮用户省钱提效并引导私信", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板以为，资金周转只能到处向银行申请 Business Loan。\n\n其实不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n第一，我们先了解你的 Financial Profile。先看你名下operate 几年的公司 business 是怎样，还有大概需要多少 funding。因为每个 customer 的 profile 不一样，我们需要先 study 你的 profile，再给你建议 ya。\n\n第二，我们来看你的 Credit Record。有些 customer 的 case 之前被银行 reject 过，其实不是讲不能做，只是需要先看看 CTOS、CCRIS 或者现有的负债情况，看有什么融资障碍需要先处理。\n\n第三，我们帮你规划 Financing Strategy。我们不只是帮你找银行，而是看你的资金需求，帮你规划更合适的方案，比如看是用 SME 融资还是通过产业套现来解决现金流。\n\n以前很多老板一需要钱就盲目去申请贷款，结果因为不了解银行的要求一直被 Reject，卡在资金周转的阶段。\n\n对方法以后，先了解自己的 Credit Record 和负债，再根据公司的 profile 规划最适合的 financing structure，解决资金问题。\n\n有融资需求？WhatsApp 我们，先让我们了解你的情况。\n\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "ai, chatgpt, prompt, gpt, ai做图, chalette", "bait": true, "type": "Video", "likes": 6012, "comments": 4451, "er": 13.09, "followers": 79947, "date": "2026-10-08", "url": "https://www.instagram.com/p/DeOq2GPDkSs/", "video": true, "ratio": 0, "score": 24.22, "status": "未处理", "x": 26.6}, {"id": "DeJvAGJARXD", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "成年人自取欺辱的10件事，你中了几个？\n\n#个人成长 #人间清醒 #认知觉醒 #女性成长 #自我成长 #chalette", "transcript": "cat dog baby dog dog dog Kalimba", "brk": "Hook类型: 痛点直击\n结构: 痛点抛出 → 共鸣唤醒 → 行为复盘\n为什么火: 列表式总结精准踩中现代人自我审视与社交焦虑的心理。\n改编角度: 盘点华人中产理财与资金规划中容易踩的10个坑。", "my": "其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n很多中小企业老板觉得，资金周转不过来的时候，一定是直接去找银行 apply loan。\n结果往往因为没有理清 Financial Profile，资料交上去直接就被银行 Reject。\n其实很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n我们先来看第一个方向，先了解你的 Financial Profile。\n很多老板申请融资时，只看自己需要多少 funding，却忽略了银行怎么看你的 Credit Record。\n如果你的 CCRIS 记录里有些小瑕疵，或者负债结构不清晰，银行看你的 assessment 就会有顾虑。\n我们需要先帮你分析这些融资障碍，看看哪个 financing structure 比较适合你。\n第二个方向，是评估你的现有资产。\n很多老板名下其实有房产，却不知道可以利用 Property Refinancing 来做 cash out。\nCash Back 不一定是现金到手，它也可以用来做 debt consolidation，帮你减少每月 commitments。\n这样一来，既解决了生意资金周转的问题，又优化了你手上的现金流。\n第三个方向，是选择合适的融资咨询服务。\n我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求。\n然后再帮你规划更合适的 Financing Strategy，看看是通过 SME Business Financing 还是其他合法机构来处理。\n即使之前被银行拒绝，也不代表完全没有其他选择，关键是先了解问题出在哪里。\n很多时候，客户一开始只是问，我需要一笔贷款来做生意，可以帮我吗？\n经过深入了解，才发现他名下有供完的房子，最后通过 property refinancing 顺利解决了资金需求。\n以前老板们遇到资金卡点，常常自己盲目去申请，结果到处碰壁。\n现在只要先把情况理清楚，找对方向，其实每个 customer 都有适合的 solution。\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "个人成长, 人间清醒, 认知觉醒, 女性成长, 自我成长, chalette", "bait": false, "type": "Video", "likes": 5562, "comments": 7, "er": 6.97, "followers": 79947, "date": "2026-10-06", "url": "https://www.instagram.com/p/DeJvAGJARXD/", "video": true, "ratio": 0, "score": 6.98, "status": "未处理", "x": 7.7}, {"id": "DfJJDi7RTAt", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "你开始变强大的5个表现，看看自己有吗？\n\n#女性成长 #个人成长 #女强人 #自我提升 #赚钱 #人间清醒 #认知觉醒 #强者思维 #chalette", "transcript": "If I ever ever fall down one time, I'mma keep going on Cause I know I'm a champion and if I take a ticket and I'll still ride till the bitter end of time", "brk": "Hook类型: 身份共鸣\n结构: 痛点引入 → 强者宣言 → 结果强化\n为什么火: 情绪价值拉满，激发女性觉醒与不服输的共鸣。\n改编角度: 结合理财投资，讲女性如何从财务焦虑到实现财富独立。", "my": "其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n很多人以为，贷款被银行 Reject 过，或者公司需要资金周转时，就一定借不到钱了。\n其实很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n关键是先了解问题出在哪里，再一步步处理。\n\n我们可以通过三个步骤，帮你重新规划资金。\n第一步，先了解你公司的情况。\n你先告诉我你公司做什么 business，operate 几年了，还有大概需要多少 funding。\n我们先 study 你的 profile，再给你建议 ya。\n第二步，分析你的财务状况。\n我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求。\n这样才能看出哪个 financing structure 比较适合你。\n第三步，调整你的融资策略。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n\n【剪辑:这里放案例画面】\n就像最近的一个 case，客户名下有几间已经供完的房子，原本只是问能不能申请 business loan。\n我们深入了解后，帮他规划了 property refinancing，通过现有产业套现，顺利解决资金需求。\n\n以前很多老板遇到资金卡住，常常不知道问题出在哪里，只能到处碰壁。\n现在只要先把情况理清楚，分析好自己的 Financial Profile 和 Credit Record。\n找到对的 financing structure，就能一步步把问题解决。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。\nBefore we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "女性成长, 个人成长, 女强人, 自我提升, 赚钱, 人间清醒, 认知觉醒, 强者思维, chalette", "bait": false, "type": "Video", "likes": 1868, "comments": 8, "er": 2.35, "followers": 79947, "date": "2026-10-31", "url": "https://www.instagram.com/p/DfJJDi7RTAt/", "video": true, "ratio": 0, "score": 2.37, "status": "未处理", "x": 2.6}, {"id": "DeI8LnOTzJC", "tracker": "VIRAL POST 竞对", "competitor": "smartacademy.sf", "caption": "🏠 已经有3间房，贷款约RM108万，\n第4间还能借90%吗？🤔\n这位来自沙捞越的John，\n目前有3间房子正在贷款，\n其中1间有出租，\n另外2间则是自住。\n那么问题来了👇\n👉 已经有3间房贷的情况下，\n第4间还能不能借到90%？\n👇点击视频，听听Gary老师怎么回答！\n立即点击下方链接报名，一起了解高通膨时代下的机会与方向！\nhttps://learning.smartfinancingco.info/sf-jmtz", "transcript": "我是John 我是來自沙勞約我問題是因為我現在目前有3000房子然後都在貸款這差不多全部加起來是108萬左右然後單收只有一間有收住有夠抵貸款的啦然後如果現在我要買第四套房因為我發現我其中一間買太小啦我要自己住啦然後有沒有可能說第四間有什麼辦法能夠再接到90%首先來自沙勞約的賺沙勞約都很多有錢人買了三間要買第四間一定要成賺他一下錢所以第四間寶寶地你要接到90%對OK這三間寶寶地買來做模特兒來第一間幾十幾十買OK 第一間差不多買了20年那個是自己住自己住啦第二間呢第二間在KL的8年前買那個是租給的那個是已經有租給的能夠抵那個貸款的了OK Rental out第三間在Kuching買來也是自己住那個是兩年前買的你一個人住兩間嗎沒有 我孩子我也是自住啦這個是你孩子住啦OK 到現在你又要買第四間是又要自己住因為你要買夢想家跟大姐沒有我的原因是這家第三間呢因為買太小了我是想說一定要把賣掉或者是租給人不過我是想說如果賣掉會比較好不過呢只是買了兩年等一下會中貸所以呢沒有來上課的是不可以的OK你賣掉會中貸是吧這個是這個是什麼問題這個是好的問題也就是說如果你賣掉的話你賺很多錢啊過我也賺租一些我也不知道會不會賺可能會賺一點點啦賺一點點的很多費用可以扣的我扣到還有的賺嗎還有就是第二個問題你知不知道每一個人都有一個Waver你可以用那個Waver的就是說你有一間屋子你賣了賺很多錢比如說我剛剛賣我的Banglore我用掉我的Waver賺很多錢OK不用給RPGT是嗎所以你的問題在哪裡你知道嗎你應該來上課上我們的課加入我們的平台來學習其實很多東西你都不懂所以你就不對做不對可以賣的怎麼會這樣趴給稅賺錢才可以給稅不要怕賺錢怎麼要趴賺錢這個是打你先講你這三個然後直接打你的答案是這個第四節可以拿到90%可以第四第五第六都可以我們絕對有方法只是不會在直播跟你講你必須要加入我們的平台哎呀在平台裡面加給人家對啊 這個是這個是我們的這個秘密武器肯定是在平台裡面", "brk": "Hook类型: 痛点直击\n结构: 抛出买4套房贷痛点 → 专家分析资产现状与盲点 → 引出平台课程与独家策略\n为什么火: 精准切中大马房产投资者的财务焦虑，用真实案例展示破局可能\n改编角度: 结合大马房贷政策，用真实客户“多套房如何高贷”的案例吸引中产买家", "my": "名下已经有三间房子，贷款加起来差不多一百万，想再买第四间，还能借到九十%吗？\n\n很多时候，大家以为名下有几间房贷，银行就一定不会再批贷款，或者觉得买多几间就没办法处理。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n第一步，我们先了解你的 Financial Profile 和现有负债，看看你目前的收入状况和承担能力到哪里。\n\n第二步，不一定是直接 apply loan，有时候用 property refinancing 或其他方式，通过现有产业评估 cash out 机会，可能会更适合你的情况。\n\n第三步，即使之前被银行拒绝，也不代表完全没有其他选择，我们会帮你规划更合适的 financing structure 来应对你的融资需求。\n\n你看最近有个客户，名下有几间产业，本来以为不能再处理，经过深入了解后，我们帮他规划了 property refinancing，通过现有产业套现来解决资金需求，同时也可以利用现金流做 debt consolidation 来减少每月 commitments。\n\n以前遇到多间房贷想继续买房或者周转，常常卡在不知道怎么整理 credit profile，或者以为银行一定 reject。\n\n现在只要先让顾问了解你的实际情况，就能找出适合你的 financing strategy。\n\n有融资需求？WhatsApp 我们，先让我们了解你的情况。", "tags": "", "bait": false, "type": "Video", "likes": 11, "comments": 0, "er": 2.05, "followers": 537, "date": "2026-10-06", "url": "https://www.instagram.com/p/DeI8LnOTzJC/", "video": true, "ratio": 0, "score": 2.05, "status": "未处理", "x": 1.2}, {"id": "Dd1L5S8TSh0", "tracker": "VIRAL POST 竞对", "competitor": "smartacademy.sf", "caption": "🏠 房东最不想收到的消息是什么？\n\n租客跟你说：\n「我要搬走了。」😮\n\n很多人以为，\n重新找下一位租客就好了。\n\n但真正让房东头痛的，\n其实是后面的事情……\n\n而且，\n时间拖得越久，对你越不利。\n\n到底为什么？❓\n\n🎥 点击影片，看看CT哥分享了什么关键细节！\n🔔 关注我，掌握更多出租房实用贴士！\n📚 想学习更多，可以报名线上课程：https://learning.smartfinancingco.info/aca-jmtz-0524", "transcript": "時間這場對你越不利當你發現到這個問題的時候壞了應該要找誰做當租客決定退租時房東必定會崩潰的事情OK 今天我們來聊一聊屋主最不想收到的消息之一就是你的天任跟你講他要搬走了為什麼我會這樣子講呢因為屋主也知道當這個租客搬走了過後呢他的工作就要開始了什麼工作呢至少你也是要check你的這個unit的condition這個天任住了這麼久有沒有東西是壞了的需要replay啦或者是需要有氣啦可以說是從頭check到尾就比如說好像這個店的續箱也是會時常會面對問題的壞了應該要找誰做需要多久的時間去找到這一個人來到你的unit座幫他寫你好比如說風扇也是有時你看到他可以轉不過他可以放棄比如說你開2號啦3號啦他還一次under你的管碩嘛這個東西呢也是非常的重要所有的細節呢都是要從頭check到尾當你發現到這個問題的時候你要找誰而且這個人呢要多少天的時間可以來到你的unit把問題解決掉呢時間這場對你越不利因為問題還沒有解決的話呢你都不能安排新的這個人來與win然後跟出租出去所以我建議各位屋主在你們設計這個物質的裝修的時候呢把所有的connecter的電話呢記下來比如說電有電的connecter個燈有個燈的connecter當你說回unit的時候你發現到各自的問題可以找回各自的connecter馬上來維修這樣子呢你可以省略很多的時間在最短的時間裡面把問題解決掉馬上再繼續的出途想學習更多可以報名參加線上課程點擊文案下方的鏈接學會有聲合的問題歡迎在評論區留言", "brk": "Hook类型: 痛点直击\n结构: 抛出房东恶梦 → 细数隐形损耗 → 给出装修留电话解法\n为什么火: 精准踩中房东空置期焦虑，细节真实引发强烈共鸣\n改编角度: 结合房贷断供痛点，教房东用按揭重组缩短空置期损失", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n有些老板以为，\n贷款被银行 Reject 过，\n就只能四处跟人借高利息的钱。\n\n其实你的 case 不是讲不能做，\n只是每个 customer 的情况不一样。\n\n有些可以直接申请，\n有些可能需要先 restructure 一下 credit profile。\n\n如果你现在正需要一笔资金周转，\n但又不知道从哪里开始，\n可以先看这三个步骤。\n\n第一，\n先了解你目前公司的 business 状况，\noperate 几年了，\n还有大概需要多少 funding。\n\n第二，\n不要急着到处申请贷款，\n先看看你的 Financial Profile 和 Credit Record。\n\n第三，\n不一定是直接 apply loan，\n有时候用 property refinancing 或其他方式，\n可能会更适合你的情况。\n\n即使之前被银行拒绝，\n也不代表完全没有其他选择。\n\n关键是先了解问题出在哪里。\n\n我们不只是帮你找银行，\n而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求，\n再帮你规划更合适的 Financing Strategy。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "", "bait": false, "type": "Video", "likes": 9, "comments": 0, "er": 1.68, "followers": 537, "date": "2026-09-28", "url": "https://www.instagram.com/p/Dd1L5S8TSh0/", "video": true, "ratio": 0, "score": 1.68, "status": "未处理", "x": 1.0}, {"id": "Dd8dHhqRg8j", "tracker": "VIRAL POST 竞对", "competitor": "smartacademy.sf", "caption": "月入6k，却要承担每个月13k的开销❓😱\n收入追不上开销，\n债务越滚越大，\n这样的情况还有机会翻身吗？\n📌 视频里，Gary老师从房贷、卡债到现金流，\n一步一步分析她的问题出在哪里。\n👇点击视频了解更多。\n\n【高通膨下的买房赚钱策略】\n📅 日期：2026年10月17日（星期六）\n⏰ 时间：2PM - 5PM\n📍 地点：Facebook 特邀群组\n💰 价格：原价 RM329，现价仅需 RM28.80\n🔥 当钱越来越不够用，\n我们需要思考的，也许不只是如何赚更多，\n而是如何让手上的资源发挥更大的价值。\n👉 立即点击下方链接报名，\n一起了解高通膨时代下的买房赚钱策略！\nhttps://learning.smartfinancingco.info/sf-jmtz", "transcript": "你肯定都想不到方法的了你要讲只去找每个月13000出来你的每个月的质疑值8000很需要老实质导一下因为我本身我的收入是6000多可是我的债务就是BangloneCredit card 还有几张Credit card的债务还有Housing loan和Personal loan都有8000块每个月然后生活费就5000因为我本身承担两个家庭因为我的姐姐找一阵子工作上不如意也有做一些小事的失败所以我在Cover两边的生活我来Clarify一下首先你说你的Mountly income是6000多是吗这个是Gross pay 还没有call EPF还没有call 这样你贴币是多少我都贴了6000多在你贴币大概有5000有你有什么公平吗Personal loan 2200两个Personal loan 2200 还有呢Personal loan 5500卡在几张minimum 北盟都要3000多3000的话这样你就签60000的卡在还有其他没有房子吗房子是在姐姐那边刚才你讲你购8000现在夹起来都是5000多不了你还有姐姐这个是姐姐的刚才你讲到一句话我又抓到姐姐做工不如意所以就不要做不是要做了也有正在找这个机会姐是开姐的OK不用紧 你姐姐有什么公平是你在工的好兴论说好兴论大概是多少6000多这个物质买了多久7年了现在这个你不知道这个房子值多少钱应该是财财而已应该是300多千论还剩下多少知道吗剩下174千我174千 OK这样这边有机会有了你姐姐除了这个房子还有其他的公平那论呢还有卡论多少钱700然后你姐姐完全没有没有储蓄了所以你姐姐的好兴论1500加到700你在工对你根本都没有法子工因为你5000你要工8000然后还有就是你们两个人的吃饭和消费是5000所以就是在想方法你肯定都想不到方法了你要这样子去找每一个月是3000出来你的每个月的质値8000所以你的行为就会公道不好然后你的质値也是蛮辛苦的你要问我的问题就是你可以讲只寻求出路对我如果我马上给你的话当然这个是要看你要去做容不容易 当然是不容易很难OK 但是你要去做的是什么呢其实我看到的这个机会在哪里你姐姐的机会你姐姐如果能够找一个不错的工作什么叫不错的工作那是如果到50多岁如果她是有经验然后她是有学历也的话她如果可以找到一个七八千的薪水OK她就觉得有能力OK能够拿这个物质去繁界refine比如说打个比方她的这个数字是300千但refine是90%可以拿到270千她就可以拿到这个100千出来用她拿到100千出来用的话OK这样子她就可以解决很多问题这个100千可以解决很多问题解决什么问题马上还掉你的卡在这样你还掉卡在的话你就第一就不用供这个3000了那你的personal loan还千多吗100多千哇你的这个东断很大一下OK但最后最后她先解决了卡在因为卡在是利息管理系你也可以不到所以这个东西越来越大了先赶到60千你还有40千可以可以缓解你接下来6到12个月的这个生活费这个费用当然如果你要更深一步的做法就是你姐姐你是可以通过我们的平台OK借到买到砖刀OK买房不用钱买房拿钱再解决你和你姐姐的问题再重整你的profile再重整你姐姐的profile然后可以通过买房拿钱去解决更多的问题其实你的问题讲大吗如果你自己去解决的话非常大可是如果你有正确的方式去解决OK就通过我们的平台你学习要购你懂什么是便宜的贷款OK然后你可以第一拿到现金流第二你可以做这个债务重组OK第三你可以过后settle你的这个债务过后你还可以创造财富我们的平台都有交", "brk": "Hook类型: 痛点直击\n结构: 揭露月入6k负债13k的极端困境 → 专家现场拆解债务与家庭压力 → 给出Refine房产与债务重组的出路\n为什么火: 真实残酷的财务危机极具代入感，专家现场剖析和给出的落地解法给绝望中的负债者带来希望。\n改编角度: 针对华人房贷族，用真实个案拆解“如何通过房产Refinance和债务重组实现负负得正”。", "my": "月入六千多，每个月开销却要八千，甚至更多❓\n\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n有些 customer 会觉得，收入不够用、债务越滚越大，就只能自己硬扛。\n\n甚至以为要赚更多钱，或者把名下的资产全部卖掉，才能解决资金周转的问题。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n\n第一，先分析你的 Financial Profile 和 Credit Record。\n\n我们不只是帮你找银行，而是先了解你的现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n\n第二，评估你名下的产业有没有机会做 Property Refinancing。\n\n通过现有产业评估 Cash Out 机会，这笔资金可以用来做 debt consolidation。\n\nCash Back 不一定是现金到手，它可以直接用来减少你每月的 commitments。\n\n第三，根据你的实际情况，看看是不是需要做 Credit & Financial Restructuring。\n\n分析 CTOS、CCRIS 及各种融资障碍，找出最适合你的解决方案。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n关键是先了解问题出在哪里，只要你愿意配合，我们就可以一起研究有什么 solution。\n\n以前有些老板，卡债和个人贷款越滚越大，每个月为了周转搞得焦头烂额。\n\n后来通过重新规划 Financing Structure，用产业重组债务后，每个月的负担减轻了很多，资金也顺畅了。\n\n有融资需求？WhatsApp 我们，先让我们了解你的情况。\n\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "", "bait": false, "type": "Video", "likes": 9, "comments": 0, "er": 1.68, "followers": 537, "date": "2026-10-01", "url": "https://www.instagram.com/p/Dd8dHhqRg8j/", "video": true, "ratio": 0, "score": 1.68, "status": "未处理", "x": 1.0}, {"id": "Dey7r-aFBu-", "tracker": "VIRAL POST 竞对", "competitor": "ibpogroup", "caption": "🎉 Congratulations to the lucky winner of our recent Financial Merdeka Campaign! 🥳✨​\n\nA huge thank you to everyone who joined us and showed your support throughout our Financial Merdeka campaign 🙌 ​\n\nDidn't win this round? Don’t worry! More exciting giveaways, contests, and campaigns are coming your way 👀🎁​\n\nStay tuned and keep following us so you don’t miss out on our next exciting campaign!​\n\nLive Better with Fusion Finance.​\n\n#IBPOGroup #FusionFinance #FinancialMerdeka", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 幸运中奖公示 → 感谢支持 → 预告后续活动\n为什么火: 利用中奖喜讯刺激受众期待心理，增强粉丝黏性与参与感\n改编角度: 结合银行理财福利，推出“晒收益赢大奖”活动提升互动率", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板以为，贷款被银行拒绝过，就代表以后再也借不到资金了。\n或者以为只能靠不断找新的银行碰运气。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n我们先 study 你的 profile，再给你建议 ya。\n\n我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n有些 customer 可以直接申请，有些可能需要先 restructure 一样 credit profile。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n\n以前老板需要资金周转时，常常盲目去申请，结果因为不了解 financing structure 而被银行 reject。\n现在透过先 study profile 和梳理 credit record，找到适合的融资方式，顺利解决资金周转问题。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "IBPOGroup, FusionFinance, FinancialMerdeka", "bait": false, "type": "Image", "likes": 58, "comments": 1, "er": 1.43, "followers": 4135, "date": "2026-10-22", "url": "https://www.instagram.com/p/Dey7r-aFBu-/", "video": false, "ratio": 0, "score": 1.48, "status": "未处理", "x": 1.8}, {"id": "Dd6SHtrE7Sm", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "最近很喜欢一句话：\n「车灯只能照亮50米，但你依然能开完全程」\n\n有时候，让我们迟迟不敢出发的，\n是总想先确定：\n这样选对不对？\n万一做不好怎么办？\n最后会不会白忙一场？\n\n可很多事情，真的要走了才知道\n你不走，只是想，永远没有答案\n\n绕了一点路，不代表之前的努力都白费了\n暂时看不清远方，也不妨碍你先走好眼前这一段\n\n愿我们都能少一点对未来的焦虑，\n多一点出发的勇气\n\n命运从没有标准答案，\n生活也无需事事圆满\n\n这14句话里，哪一句最像此刻的你？\n\n#Chalette #成长 #人生感悟 #生活 #活在當下", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 金句引入 → 剖析焦虑 → 给出解法 → 互动收尾\n为什么火: 精准捕捉年轻人对未来的迷茫与焦虑，提供情绪价值。\n改编角度: 结合金融焦虑，如“存款少不敢理财”，鼓励迈出第一步。", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板，名下明明有产业，却一直在烦恼公司资金周转。\n大家总以为，申请 SME Business Financing 一定会被银行 Reject，\n或者以为申请贷款手续很复杂，干脆就不去问了。\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n第一步，先告诉我你公司做什么 business，operate 几年了，还有大概需要多少 funding。\n我们先 study 你的 profile，再给你建议 ya。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n\n以前有些客户名下有房产，却不知道怎么套现来做生意资金周转。\n卡在不知道该找哪家银行，也不知道自己的 Financial Profile 和 Credit Record 行不行。\n后来我们先 study 他的 profile，帮他规划 Property Refinancing，通过现有产业评估 Cash Out 机会。\n不仅解决公司资金周转，还可以通过 debt consolidation 减少每月的 commitments。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "Chalette, 成长, 人生感悟, 生活, 活在當下", "bait": false, "type": "Carousel", "likes": 1179, "comments": 2, "er": 1.48, "followers": 79947, "date": "2026-09-30", "url": "https://www.instagram.com/p/Dd6SHtrE7Sm/", "video": false, "ratio": 0, "score": 1.48, "status": "未处理", "x": 1.6}, {"id": "DetkYCEDUxC", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言【AI剪辑】，我发你我的秘密！🤫㊙️\n\n#ai #codex #自动剪辑 #ai剪辑 #chatcut #chalette", "transcript": "不要打野你現在看到的字幕我人物旁邊的描邊我後面展示的圖片還有我手上這兩個會旋轉的Logo都是我用一句話讓AI幫我剪輯製作的就算今天你不會剪輯或會設計Videos的畫面也可以輕輕鬆鬆做到我這樣子的特效如果你也想要學會只要用AI實現自動剪輯在下面考驗一個AI剪輯我發你我的秘密", "brk": "Hook类型: 痛点直击+展示成果\n结构: 秀炫酷效果 → 降低门槛(小白也能做) → 留钩子引导留言\n为什么火: 用极致视觉效果击中剪辑痛点，配合极低门槛和私信钩子引导高互动。\n改编角度: 替换为AI一句话生成财务报表或智能记账特效，吸引想省时的高净值人群。", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板以为，只要贷款被银行拒绝过，或者是公司遇到资金周转问题，就只能到处去碰运气，或者四处借高利息的钱来救急。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n我们来看看可以怎么处理。\n\n第一，先了解你的 Financial Profile。\n把你的 income documents 整理好，看看你名下的资产和现有的负债情况。\n这样做是为了清楚知道银行怎么评估你的信用。\n看清楚之后，就知道自己的优势在哪里。\n\n第二，检查你的 Credit Record。\n认真看一下你的 CTOS 和 CCRIS 记录里面有没有什么阻碍。\n有些时候，不是完全不能做，只是需要先 restructure 一下 credit profile。\n把这些记录理清之后，申请的成功率就会提高。\n\n第三，评估你的融资需求。\n先告诉我们你公司做什么 business，operate 几年了，还有大概需要多少 funding。\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n选对方向之后，就不会白白去申请然后被拒绝。\n\n例如最近成交的一位 52 岁客户，一开始只是问，我需要一笔贷款来做生意，可以帮我吗。\n【剪辑:这里放案例画面】\n经过深入了解，才发现他名下有几间已经供完的房子。\n于是我们帮他规划 Property Refinancing，通过现有产业套现，解决他的生意资金需求。\n\n以前老板们遇到资金问题，常常自己去盲目申请贷款，结果被银行拒绝了也不知道原因，卡在中间不知道怎么办。\n现在只要先让专业团队 study 你的 profile，再给你建议，就能找到适合的 Financing Strategy。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "ai, codex, 自动剪辑, ai剪辑, chatcut, chalette", "bait": true, "type": "Video", "likes": 198, "comments": 310, "er": 0.64, "followers": 79947, "date": "2026-10-20", "url": "https://www.instagram.com/p/DetkYCEDUxC/", "video": true, "ratio": 0, "score": 1.41, "status": "未处理", "x": 1.5}, {"id": "DeTEXBikuBd", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言【GPT】，我把另外40个提示词发给你！😉\n\n#chatgpt #ai #prompt #trend #gpt #photodesign #chalette", "transcript": "終於整個遠遠轉轉", "brk": "Hook类型: 悬念互动\n结构: 抛出工具 → 演示效果 → 引导评论索取\n为什么火: 利用免费资料诱饵快速拉动评论区互动率\n改编角度: 留言【财富】，送华尔街高管都在用的5个AI理财提示词", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板以为，只要公司资金周转不转，就一定要直接去银行申请 loan。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样，有些可以直接申请，有些可能需要先 restructure 一下 credit profile。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n\n第一步，先整理你的 income documents。\n我们要先看你的营业情况和资金流向，才能知道你的 Financial Profile 到底卡在哪里。\n这样我们才能对症下药，看你是适合 SME Business Financing 还是其他的融资策略。\n\n第二步，检查你的 Credit Record。\n很多时候银行 reject，不是因为你没有做生意，而是因为 CTOS 或 CCRIS 里面的某些负债细节需要调整。\n只要你愿意配合，我们就可以一起研究有什么 solution，而不是盲目去撞银行的门。\n\n第三步，评估名下的产业。\n就像我们最近处理过的一个真实案例，客户名下其实有几间已经供完的房子。\n我们没有让他去申请难批的 loan，而是帮他规划 Property Refinancing，通过现有产业套现来解决生意资金需求。\n\n【剪辑:这里放案例画面】\n\n以前很多老板贷款被拒绝，就以为自己彻底没有机会了，只能到处跟朋友借钱或者放弃生意扩展。\n对方法以后变成，先了解自己的 Financial Profile、Credit Record、现有负债及融资需求，再规划更合适的 Financing Strategy，一步步把资金问题解决。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。\n\nFinance That Drives Growth.", "tags": "chatgpt, ai, prompt, trend, gpt, photodesign, chalette", "bait": true, "type": "Video", "likes": 584, "comments": 176, "er": 0.95, "followers": 79947, "date": "2026-10-10", "url": "https://www.instagram.com/p/DeTEXBikuBd/", "video": true, "ratio": 0, "score": 1.39, "status": "未处理", "x": 1.5}, {"id": "DerE0slIOt3", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "It’s been 9 days since FIRE 2026, and honestly, we’re still not over it. 🥹\n\nWe keep scrolling through the photos, replaying the moments, and smiling at how it all came together. \n\nSo here’s FIRE 2026, in frames. 📸🔥\n\nTo everyone who showed up at MITEC and took action: thank you. You gave up your Saturday to invest in your future, and that matters more than you know. We hope you left with a clear plan and a bit more confidence.\n\nTo those who registered but couldn’t make it in person: we haven’t forgotten you. Something’s coming your way very soon. Keep an eye on your inbox and our page. 👀\n\nAnd to those asking for another physical event...\n\nMaybe next year? 😏\n\nStay tuned.\n\n#FIRE2026 #FARCapital", "transcript": "", "brk": "Hook类型: 情感共鸣\n结构: 活动回顾 → 感谢参与 → 留下悬念\n为什么火: 用高粘性活动视觉与 FOMO 情绪成功激活了私域粉丝\n改编角度: 盘点年终理财峰会精彩瞬间，预告下场财富讲座吸引高意向客户报名", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多老板觉得，贷款被银行拒绝过，或者公司刚operate几年，是不是就完全没有机会了？\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n即使之前被银行拒绝，也不代表完全没有其他选择，关键是先了解问题出在哪里。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n\n第一步，先盘点你的 Financial Profile。\n\n看你的 income documents，确认现有的负债情况。\n\n然后看看你的 Credit Record，检查 CTOS 和 CCRIS。\n\n最后评估你的融资需求，看看是直接 apply loan 比较适合，还是有其他选择。\n\n第二步，研究你的 Business Financing。\n\n你先告诉我你公司做什么 business，operate 几年了。\n\n还有大概需要多少 funding。\n\n我们一起研究有什么 solution，规划更合适的 Financing Strategy。\n\n第三步，评估 Property Refinancing 的机会。\n\n不一定是直接 apply loan。\n\n有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n利用现有产业套现，解决资金需求，或者做 debt consolidation 减少 commitments。\n\n很多客户一开始问的是生意贷款，经过深入了解后，才发现名下的产业可以通过 refinancing 解决问题。\n\n以前自己乱撞，不知道问题出在哪里，申请几次都被 Reject。\n\n找对了方向以后，先 study profile，再根据实际情况规划，资金问题就能找到解法。\n\n有融资需求？\n\nWhatsApp 我们，先让我们了解你的情况。\n\n我们先 study 你的 profile，再给你建议 ya。", "tags": "FIRE2026, FARCapital", "bait": false, "type": "Carousel", "likes": 177, "comments": 2, "er": 1.28, "followers": 13967, "date": "2026-10-19", "url": "https://www.instagram.com/p/DerE0slIOt3/", "video": false, "ratio": 0, "score": 1.31, "status": "未处理", "x": 6.1}, {"id": "De6m2ZEn4kV", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "Slow days in Hanoi 🇻🇳\n\n#hanoi #vietnam #trip #slowday", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 异国慢生活画面 → 场景氛围营造 → 情感共鸣收尾\n为什么火: 用高质量的视觉和松弛感的生活方式击中都市人群的向往\n改编角度: 展示金融人实现财务自由后的理想慢生活状态，吸引客户布局理财", "my": "老板，你公司现在需要一笔资金周转，可以帮我申请 business loan 吗？\n很多人以为，只要去银行申请贷款，就一定可以顺利拿到钱。\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n第一，先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再规划更合适的 Financing Strategy。\n很多人卡在不清楚自己的信用状况，盲目去申请导致被拒绝，其实只要先做 assessment 就能避开这个障碍。\n第二，分析你名下的资产状况，看是否有产业可以做 Property Refinancing。\n利用现有产业评估 Cash Out 机会，不一定拿出现金，也可以用来做 debt consolidation，减少每月 commitments。\n第三，根据你的业务operate 年限和资金需求，选择适合的融资结构。\n我们不只是帮你找银行，而是先 study 你的 profile，再给你建议 ya。\n【剪辑:这里放案例画面】\n最近成交的 52 岁客户，本来只是问能不能申请贷款做生意，深入了解后才发现他名下有供完的房子。\n我们帮他规划 Property Refinancing 通过现有产业套现，顺利解决生意资金需求。\n以前客户到处碰壁不知道问题出在哪里，现在通过专业融资规划清楚知道自己的 Financial Profile。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n有融资需求？WhatsApp 我们，先让我们了解你的情况。", "tags": "hanoi, vietnam, trip, slowday", "bait": false, "type": "Carousel", "likes": 841, "comments": 8, "er": 1.06, "followers": 79947, "date": "2026-10-25", "url": "https://www.instagram.com/p/De6m2ZEn4kV/", "video": false, "ratio": 0, "score": 1.08, "status": "未处理", "x": 1.2}, {"id": "DeWoluYE2aM", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "很多内耗都来自过度解读\n\n不必猜透每个人的心思，\n也不必事事都寻找答案\n\n把关注点放回自己身上，\n生活自然会轻松很多\n\n你呢？\n你是容易想太多的人，还是不太在意别人的人？😂\n\n#情感 #情感共鸣 #关系 #人际关系", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 抛出内耗现象 → 给出解法 → 互动引导\n为什么火: 精准击中当代人过度解读的心理痛点，引发强烈共鸣\n改编角度: 结合金融焦虑，探讨“不必过度解读市场波动，把掌控权放回自己手中”", "my": "其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n很多人以为资金周转不通，就是因为自己 Credit Record 不好。\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n第一，我们先了解你公司做什么 business，operate 几年了，还有大概需要多少 funding。这可以帮我们看清你真正的财务状况，而不是只看表面数字。\n第二，分析你的 Financial Profile 和现有负债。有些负债其实可以通过 restructuring 来减少每月 commitments，不一定要直接 apply 新的 loan。\n第三，评估不同的 financing structure。不一定是直接申请 SME Business Financing，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n以前很多老板遇到贷款被银行 reject，或者资金卡住的时候，常常以为完全没有路走，甚至开始乱找方法。\n对不对？\n现在我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "情感, 情感共鸣, 关系, 人际关系", "bait": false, "type": "Carousel", "likes": 725, "comments": 2, "er": 0.91, "followers": 79947, "date": "2026-10-11", "url": "https://www.instagram.com/p/DeWoluYE2aM/", "video": false, "ratio": 0, "score": 0.91, "status": "未处理", "x": 1.0}, {"id": "DelF7QZlURp", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言【风扇】，我把我的制作流程发给你😉㊙️\n\n#风扇变装 #trend #ai #aivideo #higgsfield #chalette", "transcript": "", "brk": "Hook类型: 互动诱饵+视觉反差\n结构: 视觉吸睛(变装) → 抛出钩子(留言送教程) → 引导私信\n为什么火: 利用AI变装热点视觉冲击，通过免费资料诱导评论触发算法。\n改编角度: 把变装素材换成“小白3天理财/搞钱流程图”，留言特定关键词领取。", "my": "其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n很多中小企业老板以为，公司需要资金周转时，就只能直接去找银行 apply loan。\n\n甚至觉得只要贷款被银行 Reject 过，就代表完全没有其他选择。\n\n其实不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n我们可以通过三个步骤，先了解你的情况。\n\n第一步，先告诉我们你公司做什么 business，operate 几年了，还有大概需要多少 funding。\n\n我们先 study 你的 profile，了解你目前的信用记录和负债情况。\n\n这样才能知道哪个 financing structure 比较适合你。\n\n第二步，分析你的 Financial Profile、Credit Record、现有负债及融资需求。\n\n看看 CTOS、CCRIS 或者其他融资障碍出在哪里。\n\n有时候不是你借不到钱，而是还没找到适合自己的融资方式。\n\n第三步，根据你的实际情况，规划更合适的 Financing Strategy。\n\n不只是帮你找银行，而是研究有什么 solution 可以解决你的资金需求。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n以前很多老板一听到银行 Reject，就以为生意没办法继续扩展，整天卡在资金周转不过来的问题上。\n\n现在只要先了解问题出在哪里，用对方法规划融资策略，就能找到适合的解决方案。\n\n有融资需求？WhatsApp 我们，先让我们了解你的情况。\n\nBefore we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "风扇变装, trend, ai, aivideo, higgsfield, chalette", "bait": true, "type": "Video", "likes": 385, "comments": 109, "er": 0.62, "followers": 79947, "date": "2026-10-17", "url": "https://www.instagram.com/p/DelF7QZlURp/", "video": true, "ratio": 0, "score": 0.89, "status": "未处理", "x": 1.0}, {"id": "DeUZ2IESlh5", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "Thank you to everyone who showed up at MITEC today for FIRE 2026.\n\nYou gave up your Saturday, sat with us from morning till evening, asked the hard questions and stayed till the very end. That energy is what made today feel special.\n\nSeeing a full hall of people who care this much about their future is something we won’t forget. Today meant a lot to us, and we hope it meant just as much to you.\n\nSee you on the inside. 🔥\n\n#FIRE2026 #FARCapital", "transcript": "I would like to invite the man himself, the founder, the CEO of Far Capital, Mr. Fuzzle Rintosh! Thank you, Molina.", "brk": "Hook类型: 身份共鸣\n结构: 活动现场盛况 → 创始人登场 → 召唤观众加入\n为什么火: 大型线下活动高燃开场，强化社群归属感与品牌影响力\n改编角度: 拍摄华人金融峰会全场爆满镜头，引出大咖创始人分享财富自由秘籍", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板觉得，资金周转卡住了，就只能到处借高利息的钱。\n或者以为贷款被银行拒绝过一次，以后就完全不用去试了。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n有些可以直接申请，有些可能需要先 restructure 一下 credit profile。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求。\n再帮你规划更合适的 Financing Strategy。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n\n比如最近有一位 52 岁的客户，一开始只是问可以帮他申请 business loan 吗。\n我们先 study 他的 profile，深入了解后才发现他名下有几间已经供完的房子。\n于是我们帮他规划 Property Refinancing，通过现有产业套现，顺利解决他的生意资金需求。\n\n以前客户遇到资金周转问题，只会盲目去申请贷款，结果因为 Credit Record 的问题一直被 Reject。\n现在我们先分析 CTOS、CCRIS 及现有负债，找出真正的原因。\n再看是做 SME Business Financing 还是用产业套现，帮公司规划更合适的 Financing Strategy。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "FIRE2026, FARCapital", "bait": false, "type": "Video", "likes": 110, "comments": 2, "er": 0.8, "followers": 13967, "date": "2026-10-10", "url": "https://www.instagram.com/p/DeUZ2IESlh5/", "video": true, "ratio": 0, "score": 0.83, "status": "未处理", "x": 3.9}, {"id": "DfE1tjGjdUB", "tracker": "VIRAL POST 竞对", "competitor": "ibpogroup", "caption": "📸 Strike a pose, share a smile, and let the good times roll! ✨​\n\nA little glimpse of the faces behind the work, the laughs between the tasks, and the moments that make being part of the team extra special. 💙​\n\nHere’s to great people, good vibes, and making every moment count! 🫶​\n\n#IBPOGroup #LifeAtIBPO", "transcript": "Just with love and she was walking around with a lovey-doveyShut up and find me a hot oneAnd you will be saying babyStay to my heartStay to my heartI thought I could've walked awayStand back round and let us play是小米的 是小米的 冰冰是小米的 是小米的 是小米的 冰冰是小米的 是小米的 是小米的 冰冰是小米的 是小米的 冰冰Skorpion, she's so hotShe's a scorchinKilling me, soft me, Lauren or a corvorkianCome tell me", "brk": "Hook类型: 身份共鸣\n结构: 团队日常花絮展示 → 欢快背景音乐卡点 → 员工特写与互动\n为什么火: 展现真实工作氛围与团队活力，拉近品牌与受众距离\n改编角度: 结合金融团队日常，展示专业分析背后的轻松氛围与默契配合", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多 SME 企业老板，以为公司需要资金周转，就一定要马上到处去 apply loan。\n\n甚至觉得贷款被银行 Reject 过，接下来就完全没有其他办法了。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n今天跟你分享三个我们常用的融资规划方向。\n\n第一步，我们先了解你的 Financial Profile。\n\n看看你名下有没有什么资产可以重新规划。\n\n很多时候通过适当的安排，就能找到资金空间。\n\n第二步，我们会帮你看你的 Credit Record 和现有负债。\n\n分析 CTOS、CCRIS 里面有没有什么障碍。\n\n有时候把现有的 commitments 整理好，债务压力就会减轻很多。\n\n第三步，我们会根据你的融资需求，规划更合适的 Financing Strategy。\n\n不只是帮你找银行，而是看哪个 financing structure 比较适合你。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n关键是先了解问题出在哪里。\n\n以前很多老板遇到资金卡住，自己盲目去申请，结果到处碰壁。\n\n现在只要先让我们了解你的情况，我们就可以一起研究有什么 solution。\n\n有融资需求？WhatsApp 我们，先让我们了解你的情况。\n\n我们先 study 你的 profile，再给你建议 ya。", "tags": "IBPOGroup, LifeAtIBPO", "bait": false, "type": "Video", "likes": 33, "comments": 0, "er": 0.8, "followers": 4135, "date": "2026-10-29", "url": "https://www.instagram.com/p/DfE1tjGjdUB/", "video": true, "ratio": 0, "score": 0.8, "status": "未处理", "x": 1.0}, {"id": "De6V_tGqQUo", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "FIRE 2026, in motion. 🔥\n\nTo everyone who showed up at MITEC: thank you. You gave up your Saturday to learn, ask questions and take real steps toward your financial goals. Watching the room full of people ready to take action was something special, and we’re grateful you were part of it. 🙏\n\nIf you missed it, we won’t sugarcoat it: it was a massive one. The energy, the stories, the moments that made the day. Watch the video, and you’ll see what we mean. 👀\n\nBut you don’t have to stay on the sidelines. FIRE 2026 Online is happening on 31 October and 7 November, bringing the knowledge, experience and opportunities from the event to your screen.\n\nClick the link in our bio to register. 👆\n\n#FIRE2026 #FARCapital", "transcript": "Bukankah petuali Kavitek SpongeBob betulため bahagia. Spen Kun Aisabth Halif Huss Terima kasih kerana menonton!", "brk": "Hook类型: 身份共鸣\n结构: 大型活动回顾 → 现场火爆氛围 → 线上课程引流\n为什么火: 借助大型线下活动的高人气背书，引发未参与者的错过焦虑。\n改编角度: 盘点华人财商峰会高光，直击错过现场痛点，顺势推出线上金融进阶课。", "my": "很多中小企业老板，名下明明有几间供完的产业，却还是每天为公司的资金周转头痛。\n\n你是不是也以为，公司要拿资金就只能直接去申请 Business Loan？\n\n其实你的 case 不是讲不能做，很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n\n第一个方法，不一定是直接 apply loan，有时候用 Property Refinancing，可能会更适合你的情况。\n通过现有产业评估 Cash Out 机会，把资金拿来用。\n不用重新去扛完全陌生的负债。\n做完以后，公司的资金周转问题就顺利解决。\n\n第二个方法，如果是买新房子的老板，可以配合 Home Financing 加上 Cash Back 规划。\nCash Back 不一定是现金到手，它还可以直接用来帮你做 Debt Consolidation。\n这样就能有效减少你每月的 Commitments。\n减轻负担之后，现金流自然变得比较健康。\n\n第三个方法，先做 Credit & Financial Restructuring。\n分析你的 CTOS、CCRIS 还有现有的负债情况。\n找出银行审批真正的卡点在哪里。\n把 Financial Profile 调整好，再去规划接下来的 Financing Strategy。\n\n以前很多老板遇到资金卡住，只会到处碰壁，甚至直接被银行 Reject。\n现在有了专业的融资规划，先了解自己的 Financial Profile，再找到适合的方案。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "FIRE2026, FARCapital", "bait": false, "type": "Video", "likes": 93, "comments": 2, "er": 0.68, "followers": 13967, "date": "2026-10-25", "url": "https://www.instagram.com/p/De6V_tGqQUo/", "video": true, "ratio": 0, "score": 0.71, "status": "未处理", "x": 3.3}, {"id": "DeRKSAdk7Cw", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "Tennis retreat in Hanoi 🎾\n\n#wilson #wilsontennis #vietnam #tennis #tennistraining", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 兴趣爱好展示 → 奢华生活场景 → 圈层社交呈现\n为什么火: 精准切中高净值人群对高端生活方式与松弛感社交的向往\n改编角度: 展示金融精英的高端网球局或高尔夫社交，切入圈层资源共享", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n很多中小企业老板以为，只要贷款被银行 Reject 过，是不是这盘生意就完全做不下去了。\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n有些可以直接申请，有些可能需要先 restructure 一样 credit profile。\n我们先来看三个处理融资问题的方法。\n第一个，先了解你的 Financial Profile。\n我们不只是帮你找银行，而是先了解你的 Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n第二个，评估 SME Business Financing 的可能性。\n你先告诉我你公司做什么 business，operate 几年了，还有大概需要多少 funding。\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n第三个，考虑 Property Refinancing。\n不一定是直接 apply loan，有时候用产业套现或其他方式，可能会更适合你的情况。\n很多老板名下其实有产业，但没有善用这个 Financing Strategy 来做资金周转。\n以前很多老板资金卡住时，到处碰壁却不知道问题出在哪里。\n甚至以为被一家银行拒绝，就代表所有银行都不能做。\n了解自己的 profile 之后，才知道原来可以用不同的方式来处理。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "wilson, wilsontennis, vietnam, tennis, tennistraining", "bait": false, "type": "Carousel", "likes": 520, "comments": 8, "er": 0.66, "followers": 79947, "date": "2026-10-09", "url": "https://www.instagram.com/p/DeRKSAdk7Cw/", "video": false, "ratio": 0, "score": 0.68, "status": "未处理", "x": 0.7}, {"id": "DfHRh4IAmZR", "tracker": "VIRAL POST 竞对", "competitor": "ibpogroup", "caption": "“Kalau rumah saya atas nama suami & isteri, boleh tak refinance atas satu nama sahaja?” 🏠​\n​\n“Adakah bank akan bayar pinjaman lama saya terus atau tunai akan masuk ke akaun saya?” 🤔​\n​\nDalam episod kali ini, kami akan kupas dan menjelaskan kedua-dua persoalan tersebut supaya anda lebih memahami proses refinancing, termasuk bagaimana ia berfungsi dan perkara yang perlu dipertimbangkan sebelum membuat keputusan.​\n​\nTonton sampai habis untuk mengetahui jawapannya! 👀​\n​\nNak tahu lebih lanjut tentang pilihan refinancing yang sesuai dengan situasi kewangan anda? Hubungi kami melalui WhatsApp link di bio.​\n​\nLive Better with Fusion Finance.​\n​\n#IBPOGroup #FusionFinance #LetsTalkDuit​", "transcript": "skim ini selalu dia ada termedah syarat 5 ke 10 tahun dulu boleh tapi dia kena buat proses tukar hak milik dan yang penting kena ada pesetujuan semua pihak dan kerelusan daripada pihak bank selalunya bank baru dia akan bayar bagi pinjaman rumah yang lama kepada bank yang asal jika ada lebihhan tunai, cash out bank akan terus masukkan ke dalam kawan customer kalau customer tu dia request untuk kita setakan putang-hutan dia seperti kereta, kredit kart sobaiknya akan setakan putang-hutan yang sedia adalah boleh cuma untuk rumah wee, prima selama kuni ataupun ini rumah yang under affordable house scheme ini selalunya dia ada termedah syarat 5 ke 10 tahun tu lah selalunya tak boleh buat refinance, tak boleh jual rumah sebelum nak buat refinance tu, double check dengan awak punya loan agreement tu sama saja konsep dia macam kita tukar daripada bank A kepada bank B kita tukar pinjaman daripada LPSA kepada bank commercial apa yang bagusnya kalau kita tukar pinjaman daripada LPSA kepada bank commercial so kualitar LPSA tu akan jadi affordable balik jadi kita boleh beli rumah baru guna LPSA pula", "brk": "Hook类型: 痛点直击\n结构: 提出常见疑问 → 拆解转名与现金回退规则 → 引导咨询转化\n为什么火: 精准切中房产转名与转贷的常见盲区，解答专业且实用。\n改编角度: 针对华人房主，用华语拆解“联名转单名/转贷套现”的避坑指南。", "my": "很多时候，不是你借不到钱，而是还没找到适合下的融资方式。\n\n很多中小型企业老板，或者产业投资者，以为名下的产业如果还在供，或者有特定的条件限制，就完全不能做任何资产重组。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n有些可以直接申请，有些可能需要先 restructure 一下 credit profile。\n\n我们先了解你的情况，然后再看看哪个 financing structure 比较适合你。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n第一步，我们先看你名下产业的状况。\n\n你需要先告诉我你名下目前有哪些产业，大概的市价是多少，还有还有多少贷款还没还清。\n\n我们先 study 你的 profile，再给你建议 ya。\n\n第二步，我们来看你目前的债务和资金需求。\n\n有些时候，客户以为 refinance 拿到的钱只能全部拿来做现金周转。\n\n其实 Cash Back 不一定是现金到手。\n\n这笔资金可以直接用来帮客户做 debt consolidation，来减少每月 commitments。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n关键是先了解问题出在哪里。\n\n第三步，我们帮你规划更合适的 Financing Strategy。\n\n我们不只是帮你找银行。\n\n而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求。\n\n再帮你规划更合适的融资方向。\n\n很多时候，客户一开始只是问，我需要一笔贷款来做生意，可以帮我吗？\n\n经过深入了解，才发现他名下有几间已经供完的房子。\n\n于是我们帮他规划 Property Refinancing，通过现有产业套现，解决他的生意资金需求。\n\n以前，很多老板遇到资金周转问题，或者贷款被银行 Reject，就自己到处碰壁，不知道问题卡在哪个 Credit Record 上。\n\n现在，只要先让我们了解你的情况，我们帮你做 assessment，看你的 income documents 和信用记录。\n\n找到适合的 financing structure 之后，事情其实没有想象中那么复杂。\n\n有融资需求？\n\nWhatsApp 我们，先让我们了解你的情况。", "tags": "IBPOGroup, FusionFinance, LetsTalkDuit", "bait": false, "type": "Video", "likes": 25, "comments": 0, "er": 0.6, "followers": 4135, "date": "2026-10-30", "url": "https://www.instagram.com/p/DfHRh4IAmZR/", "video": true, "ratio": 0, "score": 0.6, "status": "未处理", "x": 0.7}, {"id": "DfB2KqMj7Np", "tracker": "VIRAL POST 竞对", "competitor": "ibpogroup", "caption": "PURR-sonal finance check! 🐱💸​\n​\nPick a cat, follow the line, and get financially roasted! 👀🔥​\n​\nLive Better with Fusion Finance.​\n​\n#IBPOGroup #FusionFinance", "transcript": "", "brk": "Hook类型: 趣味互动\n结构: 选猫 → 追踪线条 → 获取理财犀利吐槽\n为什么火: 利用猫咪萌宠元素降低理财严肃感，趣味互动提升完播与参与率\n改编角度: 华人理财可改为“选财神/招财猫测你今年存下多少钱”，结合趣味标签引流", "my": "", "tags": "IBPOGroup, FusionFinance", "bait": false, "type": "Carousel", "likes": 23, "comments": 0, "er": 0.56, "followers": 4135, "date": "2026-10-28", "url": "https://www.instagram.com/p/DfB2KqMj7Np/", "video": false, "ratio": 0, "score": 0.56, "status": "未处理", "x": 0.7}, {"id": "De1SxjpAot9", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言 【video】 ，我发你完整Claude 视频特效prompt 🔥\n\n我最喜欢用的是第 18 😂， 你呢？\n\nFollow 我学会更多AI内容策略\n#claude #claudeai #videoediting #motiongraphics #contentcreator", "transcript": "数据推进打扣清单拉远接视冲刺转场玻璃大致手挥斗动绿幕幻景杂志封面数据远黄丝纸转场手机框标题墙变焦破框黄绕卡片UI世界回顾照片墙文字在表后面组织动态字幕想要19个Cloud视频特效Prob留言Videos我发完整的教程给你", "brk": "Hook类型: 引导互动/福利诱饵\n结构: 炫技展示特效 → 揭晓最爱序号 → 评论留关键词送资料\n为什么火: 用高视觉冲击的AI特效合集直接抓人眼球，配合免费领取的利他钩子驱动海量评论。\n改编角度: 盘点5个华人在海外常用的BANKING AND FINANCE必备AI工具，评论区送提效Prompt。", "my": "其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n很多人以为，贷款被银行 Reject 过，就一定没办法再拿到资金。\n其实不是这样的。\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n关键是先了解问题出在哪里。\n我们来聊聊三个可以去看的方向。\n第一个，不要直接就去申请普通的贷款。\n因为每个人的 Financial Profile 不一样。\n我们需要先了解你的 Credit Record 和现有负债。\n看看到底是什么原因导致卡住。\n这样才能找出真正适合你的 Financing Strategy。\n第二个，看看名下有没有其他的产业。\n很多老板需要生意资金周转时，只想到申请新的 business loan。\n其实不一定是直接 apply loan。\n有时候用 property refinancing，可能会更适合你的情况。\n利用现有产业评估 Cash Out 机会。\n把资金套现出来解决问题。\n或者做 debt consolidation 来减少每月 commitments。\n第三个，把资料准备齐全再做 assessment。\n我们需要看你的 income documents。\n还有了解公司 operate 几年了。\n大概需要多少 funding。\n然后看看哪个 financing structure 比较适合你。\n我们不只是帮你找银行。\n而是先了解你的 Financial Profile 和现有负债。\n再帮你规划更合适的方案。\n【剪辑:这里放案例画面】\n有一个 52 岁的客户，一开始只是问可以帮他申请一笔贷款来做生意吗。\n经过深入了解，才发现他名下有几间已经供完的房子。\n于是我们帮他规划 Property Refinancing，通过现有产业套现。\n顺利解决了他的生意资金需求。\n以前客户遇到资金周转或者被 Reject 的时候，常常不知道该怎么处理。\n只能到处碰壁，或者以为完全没有办法了。\n用对方法以后，先了解自己的情况，再配合合适的 Financing Structure。\n其实可以找到很好的解决方式。\n有融资需求，WhatsApp 我们，先让我们了解你的情况。\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "claude, claudeai, videoediting, motiongraphics, contentcreator", "bait": true, "type": "Video", "likes": 103, "comments": 106, "er": 0.26, "followers": 79947, "date": "2026-10-23", "url": "https://www.instagram.com/p/De1SxjpAot9/", "video": true, "ratio": 0, "score": 0.53, "status": "未处理", "x": 0.6}, {"id": "De3HmCJNPb3", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "一定要远离长期贬低消耗你的人！\n\n#个人成长 #女性成长 #认知觉醒 #人间清醒 #负能量 #内耗", "transcript": "如果你每一次跟一個人見面完你都開始去懷孕你自己我跟你講 這種人你連見都不要再一見了就算是很多年的朋友說話很多年的親戚也可以我跟一個人出去就有兩個原因第一個原因就是我開心我跟你在一起我會有情緒上面的價值第二個東西就是我要做事情要談生意如果這兩個人都沒有站起床一個人說 既然你出去是為了什麼你跟他講我要減肥他就跟你講減什麼肥你不能收的你跟他講我想要找一個健身房去做均找一個老師但他就跟你講你三分鐘的獨當費錢你講什麼都是錯的跟他出去你又沒有辦法快樂得到事業上面的麻煩全部都沒有重要的感覺所以我跟你講我的人生是很少朋友的甚至可以講沒有朋友因為很多人他都是不想你過得好的甚至有些父母都看不順眼他的孩子過得比他還要好人就是會有這種進度的心我不是講你有這個東西是過的但是你能不能控制你自己很多人他沒有辦法控制他自己度自己的心他就會用言語行為來傷害你你要有個成熟的思維你才能夠控制好你自己像小孩子這樣沒有辦法得到這個玩具他就要哭了你不會嗎因為你會控制你自己嗎這個是你行為上面的控制你你剛才在思想上面很多人是不會的就算他上次是50所以他歲數沒有關係是他成熟的問題所以他就會想要懂你懂要你過你就不爽就不要玩玩那該要花更多的時間盡力去更讓你愉快讓你有所成就的人在一起就夠了如果你跟你自己相處就能夠很愉快你完全可以我在你自己的世界裡面", "brk": "Hook类型: 痛点直击\n结构: 抛出毒友现象 → 举例痛陈利弊 → 揭露嫉妒人性 → 呼吁远离圈子\n为什么火: 精准共鸣大众在社交和家庭关系中遭受的精神内耗，直白揭露人性嫉妒。\n改编角度: 盘点银行理财或财富规划中，劝你别存钱、嘲笑你理财的“穷亲戚”，切断内耗。", "my": "如果你名下的贷款之前被银行拒绝过，你开始怀疑是不是自己哪里做错了，我跟你讲，这种盲目自我怀疑的心态，你真的要停下来。\n\n很多人面对资金周转或者业务扩展的时候，常常听信身边的闲话。\n\n你跟别人讲你需要找一笔融资来周转生意，对方就跟你讲，现在经济不好不要借钱。\n\n你跟别人讲你想通过现有产业套现来做扩展，对方就跟你讲，供房子已经很累了，不要搞那么多事情。\n\n你讲什么方案都是错的，跟他聊完以后，你不但没有得到实质的帮助，反而陷入更多的焦虑，生意上的麻烦全部都没有解决。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样，有些可以直接申请，有些可能需要先 restructure 一代 credit profile。\n\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n关键是先了解问题出在哪里。\n\n我們不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n只要你愿意配合，我们就可以一起研究有什么 solution。\n\n比如我们最近接触过的一个 case，客户一开始只是问，我需要一笔贷款来做生意，可以帮我吗。\n\n经过深入了解，才发现他名下有几间已经供完的房子。\n\n于是我们帮他规划 Property Refinancing，通过现有产业套现，解决了他的生意资金需求。\n\n以前很多人遇到贷款被拒绝，就直接放弃，卡在资金周转的困境里。\n\n现在你可以选择先了解自己的 Financial Profile、Credit Record 和现有负债。\n\n我们先 study 你的 profile，再给你建议 ya。\n\n有融资需求？WhatsApp 我们，先让我们了解你的情况。", "tags": "个人成长, 女性成长, 认知觉醒, 人间清醒, 负能量, 内耗", "bait": false, "type": "Video", "likes": 399, "comments": 4, "er": 0.5, "followers": 79947, "date": "2026-10-24", "url": "https://www.instagram.com/p/De3HmCJNPb3/", "video": true, "ratio": 0, "score": 0.51, "status": "未处理", "x": 0.6}, {"id": "Dfbpg9BNlYP", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "创业到现在，我最庆幸的一件事，就是当初别人不看好我的时候，我还是选择继续走下去。\n\n23岁做intern，一个月赚RM1000；\n24岁的时候，甚至一度没有收入。\n\n那时候连我自己都不知道未来会怎样，更不要讲，要别人相信我以后可以开自己的公司、拥有自己的团队，从自己1个人，拼到现在10多个人。\n\n在还没有做出成绩之前，被质疑是家常便饭。\n以前会想解释，后来才发现，解释再多，也不如把眼前的事情做好。\n\n创业让我慢慢学会，不再每做一个决定，都向别人要认可。\n如果每走一步，都要等别人觉得我可以，那我可能到今天都还停在原地。\n\n不会，就去学；做了没有效果，就找原因、换方法。\n**解决问题，而不是被问题解决。**\n\n我也不是一开始就知道自己选对了，而是在一次次解决问题的过程中，把这条路慢慢走通。\n\n我很庆幸，当初没有因为别人的不看好，就选择放弃。\n\n接下来，还有很多想做的事。\n希望再过5年回头看，我也能像今天一样，庆幸自己有继续往前走。\n\n我们一起加油❤️\n\n#创业 #女性创业 #人间清醒 #认知觉醒 #女性独立 #相信自己 #女老板 #创业心得 #chalette", "transcript": "I'm a version with no brakes. I'm invincible. And I will never see you.", "brk": "Hook类型: 身份共鸣\n结构: 低谷期经历 → 遭遇质疑 → 心态转变 → 持续前行\n为什么火: 真实吐露创业初期困境与心路历程，引发奋斗者强烈情感共鸣。\n改编角度: 讲述金融小白如何顶住质疑完成首笔大单，突显财商成长。", "my": "其实你的case不是讲不能做，只是每个customer的情况不一样。\n\n很多时候，你觉得自己借不到钱，是因为你把困难当成了终点。\n\n其实你的case不是讲不能做，只是每个customer的情况不一样。\n\n有些直接申请，有些需要先整理好credit profile。\n\n不一定是直接apply loan，有时候用property refinancing，可能会更适合你的情况。\n\n第一步，我们先了解你的公司做什么business，operate几年了，还有大概需要多少funding。\n\n只要你愿意配合，我们就可以一起研究有什么solution。\n\n我们不只是帮你找银行，而是先了解你的Financial Profile、Credit Record、现有负债及融资需求。\n\n再帮你规划更合适的Financing Strategy。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n关键是先了解问题出在哪里。\n\n以前你可能觉得，贷款被reject一次，就代表这条路完全走不通了。\n\n那时候不懂得看自己的Credit Record和income documents，只会盲目地到处申请。\n\n换了方法之后，我们先 study 你的 profile，再给你建议 ya。\n\n找到适合自己的融资方式，资金周转的问题自然就能慢慢理顺。\n\n有融资需求？\n\nWhatsApp 我们，先让我们了解你的情况。", "tags": "创业, 女性创业, 人间清醒, 认知觉醒, 女性独立, 相信自己, 女老板, 创业心得, chalette", "bait": false, "type": "Video", "likes": 359, "comments": 4, "er": 0.45, "followers": 79947, "date": "2026-11-07", "url": "https://www.instagram.com/p/Dfbpg9BNlYP/", "video": true, "ratio": 0, "score": 0.46, "status": "未处理", "x": 0.5}, {"id": "DfpPjBDuyBX", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言【神图】，我把另外20个修图指令发你！🔥\n\n#chatgpt #修图 #p图 #photoedit #修图指令 #ai修图 #chalette #gpt", "transcript": "拍照的照片先不要刪掉这五个Touch Beauty的指令把你的肺片变成图踢这个指令照片一秒变清晰踢这个指令头发挡点也有了救踢这个指令把你的眼睛打开踢这个指令表情不自然也不怕踢这个指令不用再自己动手调色我整理出另外二十个指令留言 神服 我发给你", "brk": "Hook类型: 实用干货+结果承诺\n结构: 痛点引入 → 给出5个具体指令(核心价值) → 引导评论区留暗号(转化)\n为什么火: 直接解决用户修图痛点，通过免费资料包诱导评论互动，极易起量\n改编角度: 分享5个高净值人群都在用的ChatGPT理财/记账指令，留言领完整版", "my": "贷款被银行拒绝的照片先不要删掉。\n\n很多中小企业老板以为，只要贷款被拒过一次，接下来不管找哪家银行或怎样重新申请，结果都一定是一样被Reject。\n\n其实你的case不是讲不能做，只是每个customer的情况不一样。\n\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n我们先看第一个方法，调整你的Financing Strategy。\n不一定是直接apply loan，有时候用property refinancing或其他方式，可能会更适合你的情况。\n因为不同的融资结构，对银行来说评估标准完全不同。\n这样规划之后，比较容易找到适合你的solution。\n\n我们看第二个方法，整理你的Credit Record。\n有些customer可以直接申请，有些可能需要先restructure一下credit profile。\n我们先了解你的Financial Profile和现有负债，再看问题出在哪里。\n把这些记录整理清楚，银行评估时看的角度就会不一样。\n\n我们看第三个方法，评估你的income documents。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n我们需要先了解完整情况，看你的收入证明和业务运作到底卡在哪里。\n只要你愿意配合，我们就可以一起研究有什么solution。\n\n以前很多老板自己去申请，被银行拒绝后就不知道还能怎么办，卡在资金周转的关卡。\n现在用对方法，先了解自己的Financial Profile和融资需求，再规划合适的Financing Strategy，事情就会变得比较清晰。\n\n有融资需求？\nWhatsApp我们，先让我们了解你的情况。\n\n我们先study你的profile，再给你建议ya。", "tags": "chatgpt, 修图, p图, photoedit, 修图指令, ai修图, chalette, gpt", "bait": true, "type": "Video", "likes": 129, "comments": 73, "er": 0.25, "followers": 79947, "date": "2026-11-12", "url": "https://www.instagram.com/p/DfpPjBDuyBX/", "video": true, "ratio": 0, "score": 0.44, "status": "未处理", "x": 0.5}, {"id": "Debi0PzETRa", "tracker": "VIRAL POST 竞对", "competitor": "chaletteku", "caption": "留言【Design】，我发你操作流程！😉\n\n#ai #codex #higgsfield #aiads #aicontent #aidesign #chalette", "transcript": "很多人用AI到今天才只會生產一盞土阿拉馬我跟妳講妳太浪費了現在Cordes配一個工具可以直接成為妳的品牌設計團隊妳要做的這種UGC 彈匹 推延模型廣告素材甚至一整套品牌內容都可以用它去操作這個工具就叫做Kits ViewKits View最近新推出來的新的市場主流而Cordes剛好最會去動畫去操作這些東西兩個配菜一起無論妳給它什麼素材它都能夠生素妳想要的東西操作很簡單冒險兩個步驟首先第一個步驟就進去你的Cordes然後妳就可以掛印掛印有夠的其實妳就可以選Kits View按了Kits View過妳就Install Connect然後就Connect了第二個步驟其實就是做素材直接講妳要什麼湯就可以做給妳比如這個全部妳都可以做出來過去妳還要請一整個團隊把妳去做還要等他們幾天現在妳Kits View加Cordes妳要改幾次都可以妳想要完整的流程像妳寫個D站我叫助理發給妳", "brk": "Hook类型: 痛点直击\n结构: 痛点揭示 → 工具组合演示 → 领取福利转化\n为什么火: 戳中企业想省钱省团队的痛点，用具体AI工具组合给出了省时省力的落地解法\n改编角度: 结合银行业务，教粉丝用AI工具一键生成高转化率的金融产品广告素材与海报", "my": "很多人以为公司要扩大规模只能靠硬扛，我跟你讲，你太浪费了。\n\n其实很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n你以为贷款被银行 reject 过就没办法了，其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n\n想要做好融资规划，其实只要通过这三个步骤。\n第一个步骤，先了解你目前的情况。\n你先告诉我你公司做什么 business，operate 几年了，还有大概需要多少 funding。\n我们先 study 你的 profile，再给你建议 ya。\n第二个步骤，看你的 income documents。\n我们先了解完整情况，看你是需要做 SME Business Financing，还是需要通过现有产业评估 Cash Out 机会。\n这样才能看出哪个 financing structure 比较适合你。\n第三个步骤，规划你的 Financing Strategy。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n关键是先了解问题出在哪里，只要你愿意配合，我们就可以一起研究有什么 solution。\n\n以前很多老板一听到资金周转就慌，到处碰壁也不知道问题出在哪里。\n现在只要先把资料准备好，让专业团队帮你做 assessment，就可以少走很多弯路。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "ai, codex, higgsfield, aiads, aicontent, aidesign, chalette", "bait": true, "type": "Video", "likes": 89, "comments": 73, "er": 0.2, "followers": 79947, "date": "2026-10-13", "url": "https://www.instagram.com/p/Debi0PzETRa/", "video": true, "ratio": 0, "score": 0.39, "status": "未处理", "x": 0.4}, {"id": "De1NrDgCt5e", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "Just two or three years into your career, with savings still building. Car first, or property first?\n\nThat was the decision one of our FIRE 2026 attendees, a young engineer from Johor, walked in with. He came to decide whether to prioritise a car or an asset. \n\nMany people hold back from property because they assume it needs big capital to start. But once he understood how it can be done, he made his decision that same day, before the session even ended.\n\nMissed FIRE 2026 at MITEC?\n\nFIRE 2026 Online brings the knowledge, experience and opportunities from the event to your screen in two live Zoom sessions. It might help you make a decision just as clear.\n\n📅 Part 1: Saturday, 31 October | 11AM–3PM\n📅 Part 2: Saturday, 7 November | 11AM–3PM\n\nJoin FIRE 2026 Online for only RM60. 👇\n\nhttps://f.mtr.cool/9xwh1379qv", "transcript": "dan benda itu tiga sains je but i came here to make my final decision i didai nak prioritize property which is an asset compared to a car liability nama Amirul umur tahun ni 26 jes e-engineer saya dari Joghok i came here saya tak ada any commitments lagi so i do submit learn for car sebenarnya and benda itu tiga sains je but i came here to make my final decision benda i nak prioritize property which is an asset compared to a car liability so i decided i go for property dah confirm lah dah yakin common people akan minta takut untuk join because of property really needs big capital so dekat for capital benda itu doable sains pun itu akan dapat cashback aku suka sebab saya sendiri kerja baru dalam dua ketiga takut and i came here tak sampai sepasdua hari pun saya dah register as i came here tak sempat nak habiskan sains je terini dah terus yakin lah jemislah saya pun as a client saya akan go through my first property tengok macam mana how easy it is for people to take and helps me make my money", "brk": "Hook类型: 痛点直击\n结构: 抛出年轻人的纠结选择 → 真实客户案例分享 → 转化引导报名线上活动\n为什么火: 精准切中职场新人买车还是买房的现实痛点，用真实案例打破买房门槛高的认知\n改编角度: 针对华人白领，用“先买房还是先买车”作对比，推出银行业务的资产配置方案", "my": "刚毕业两年，想要买车还是买房？\n\n很多年轻人以为，买房一定要准备很大一笔资金。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n第一个方法，我们先 study 你的 profile。\n我们要看你的 Financial Profile、Credit Record 和现有负债。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n这样你可以更清楚自己的债务状况，也可以评估接下来需要多少 funding。\n\n第二个方法，我们帮你规划 Financing Strategy。\n我们不只是帮你找银行，而是看你目前 operate 几年的 business 或者是你的收入文件。\n然后再看看哪个 financing structure 比较适合你。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n\n第三个方法，看你需要怎样安排 Cash Back。\n现金到手不一定是直接拿现金，也可以用来帮你做 debt consolidation。\n这样可以有效减少你每月的 commitments。\n我们会根据你的 income documents 来评估最适合你的方案。\n\n以前很多老板和年轻人，卡在不知道怎么跟银行沟通。\n现在你可以让我们先了解你的 Financial Profile 和融资需求。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "", "bait": false, "type": "Video", "likes": 33, "comments": 1, "er": 0.24, "followers": 13967, "date": "2026-10-23", "url": "https://www.instagram.com/p/De1NrDgCt5e/", "video": true, "ratio": 0, "score": 0.26, "status": "未处理", "x": 1.2}, {"id": "DfENXKyCr1P", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "“Faizul, why do you bother with the mass market? Sell to rich people instead, they’ve got money, they complain less.”\n\nI get asked this constantly, by business advisors, consultants, even billionaires.\n\nHere’s the honest answer: making a rich person richer doesn’t change their life.\n\nI came from a B40 family myself, no network, no advantage, when I started. I know exactly what it feels like to buy your first property with nothing behind you.\n\nThat’s exactly why we built what we did, and why clients who started with nothing are the ones we’re proudest of.\n\nStarting from zero yourself?\n\nFIRE 2026 Online brings the knowledge, experience and opportunities from our physical event to your screen, in two live Zoom sessions, so you can see what your first step could look like.\n\n📅 Part 1: Saturday, 31 October | 11AM–3PM\n📅 Part 2: Saturday, 7 November | 11AM–3PM\n\nJoin FIRE 2026 Online for only RM60. 👇\n\nhttps://f.mtr.cool/flnmdddqnq", "transcript": "Ia berlaku sangat serius di sini adalah saya tidak berminat mengenali orang yang menarik untuk dikembangkan Saya datang dari keluarga B40 apabila saya berada di industri ini saya tidak ada network Sebenarnya, saya tidak ada apa-apa Jadi saya tahu apa yang ia seperti untuk membeli kepercayaan dengan tidak membuat keputusan dengan bergantung Jadi saya selalu dapat beritahu oleh banyak pembina dan orang yang bergantung dan orang yang sangat kecil dan berlaku mereka selalu beritahu saya satu-satunya soalan Kenapa anda peduli tentang keputusan masjid yang diberikan? Kenapa anda tidak berlaku untuk membeli keputusan untuk orang yang menarik? Mereka dapat duit mereka tidak berlaku Kenapa anda perlu pergi ke kemas mereka? Untuk membeli ke B40, B40 orang yang berlaku tidak ada masalah Kenapa? Dan jawapan kepada pertanyaan itu adalah ia berlaku sangat serius di sini adalah saya tidak berminat mengenali orang yang menarik untuk dikembangkan ia tidak akan berubah hidup itu Saya ada pelajaran yang tidak ada kemampuan apabila mereka datang ke saya dan hari ini mereka berlaku pada beberapa hundera puluh puluh puluh Saya ada pelajaran yang berlaku dengan dua kawasan hari ini mereka lebih daripada dua puluh puluh Saya ada pelajaran yang dapat pergi ke pejabat untuk mencari kemudian kemudian saya setiap minggu tanpa keadaan saya akan berkata Faham, terima kasih banyak saya tidak pernah melihat hundera puluh puluh puluh di bank saya sekarang saya dapat berkata ke ibu saya untuk umrah sekarang saya akan berkata ke umrah dan akan beritahu saya apa-apa pun yang anda mahu berdoa untuk saya dan saya akan suka berfikir dengan berubah sebaiknya orang hidup", "brk": "Hook类型: 反常识\n结构: 质疑切入 → 身份背景 → 使命愿景 → 活动转化\n为什么火: 创始人逆袭故事引发底层共鸣，不割富人韭菜的情怀极具杀伤力\n改编角度: 讲华人底层靠理财逆袭的故事，结合低门槛线上财商课引导小白报名", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板以为，贷款被银行拒绝过，或者资金周转卡住，就只能到处借高利息的钱，或者干脆放弃扩展业务。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样，有些可以直接申请，有些可能需要先 restructure 一下 credit profile。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。关键是先了解问题出在哪里。\n\n我们不只是帮你找银行，而是先了解你的 Financial Profile、Credit Record、现有负债及融资需求，再帮你规划更合适的 Financing Strategy。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n例如最近成交的客户，52 岁，一开始只是问，我需要一笔贷款来做生意，可以帮我吗。\n\n【剪辑:这里放案例画面】\n\n经过深入了解，才发现他名下有几间已经供完的房子。\n\n于是我们帮他规划 property refinancing，通过现有产业套现，解决他的生意资金需求。\n\n以前客户自己去申请，常常不知道银行看的是什么，收入文件怎么准备，结果被银行 reject 了也不知道原因。\n\n现在我们先了解你的情况，看看哪个 financing structure 比较适合你，帮你一步步规划。\n\n有融资需求，WhatsApp 我们，先让我们了解你的情况。\n\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "", "bait": false, "type": "Video", "likes": 24, "comments": 0, "er": 0.17, "followers": 13967, "date": "2026-10-29", "url": "https://www.instagram.com/p/DfENXKyCr1P/", "video": true, "ratio": 0, "score": 0.17, "status": "未处理", "x": 0.8}, {"id": "DeRlUj7DGC_", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "FIRE 2026 is officially SOLD OUT! 🔥\n\nThank you to everyone who secured a seat.\nWe can’t wait to see you at MITEC KL tomorrow! \n\n📍 MITEC, Kuala Lumpur | 9AM–6PM", "transcript": "", "brk": "Hook类型: 成果展示\n结构: 官方活动售罄 → 感谢粉丝支持 → 预告活动时间和地点\n为什么火: 利用FOMO心理（错失恐惧），通过大型活动售罄制造稀缺感与社会认同。\n改编角度: 华人金融团队可发布热门理财讲座或私董会席位秒空战报，强化专业背书。", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板觉得，\n资金周转不过来的时候，\n只能盲目去申请新的 business loan。\n\n其实你的 case 不是讲不能做，\n只是每个 customer 的情况不一样。\n\n不一定是直接 apply loan，\n有时候用 property refinancing 或其他方式，\n可能会更适合你的情况。\n\n第一步，先了解你公司做什么 business。\noperate 几年了，\n还有大概需要多少 funding。\n这样才能看清楚真正的资金需求在哪里。\n\n第二步，检查你的 Financial Profile 和 Credit Record。\n看看 CTOS 和 CCRIS 里面有什么障碍。\n有些可以直接申请，\n有些可能需要先 restructure 一样 credit profile。\n\n第三步，规划适合你的 Financing Strategy。\n不只是帮你找银行，\n而是了解现有负债及融资需求，\n再看看哪个 financing structure 比较适合你。\n\n即使之前被银行拒绝，\n也不代表完全没有其他选择。\n关键是先了解问题出在哪里。\n\n以前很多老板贷款被 Reject 以后，\n就以为完全没办法了。\n现在只要先 study 你的 profile，\n再配合对的方法，\n就能找到适合的融资方式来解决周转问题。\n\n有融资需求？\nWhatsApp 我们，\n先让我们了解你的情况。", "tags": "", "bait": false, "type": "Image", "likes": 21, "comments": 1, "er": 0.16, "followers": 13967, "date": "2026-10-09", "url": "https://www.instagram.com/p/DeRlUj7DGC_/", "video": false, "ratio": 0, "score": 0.17, "status": "未处理", "x": 0.8}, {"id": "DeQ4m77kYQK", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "FIRE 2026 is TOMORROW! 🔥\n\nHere’s everything you need to know before you arrive. Swipe through the full guide. 👉\n\n📅 Saturday, 10 October 2026\n📍 MITEC, KL. Hall 3, North Entrance\n🚪 Doors open 9.00 AM | Event starts 10.00 AM | Ends 6.00 PM\n\n🚨 Come early: three other major events are on at MITEC the same day, so roads and parking will be packed. Aim to arrive 60 to 90 minutes before the start. It’s free seating, so the best spots go to early arrivals.\n\n🚙 Getting there: search “MITEC North Entrance” on Waze or Google Maps. If MITEC parking is full, park at MET 1 (about a 5-minute walk). Grab drop-off and pick-up is at the North Entrance.\n\n✅ Before you arrive: have your QR code from your registration email ready, and get your eCCRIS report downloaded beforehand, as signal can be weak in a full hall.\n\n🎒 Do bring: a water bottle or tumbler (water dispensers are available outside the hall), a sweater or shawl (the hall can get a little chilly), a pen, a powerbank and any personal medications.\n\n", "transcript": "", "brk": "Hook类型: 实用指南/活动预告\n结构: 活动核心信息 → 交通与停车攻略 → 现场注意事项与携带清单\n为什么火: 信息密度极高且直击痛点，提前解决参会者的所有潜在焦虑与麻烦\n改编角度: 针对金融讲座或财商工作坊，出一份“参会前必带/必查资料”的防坑指南", "my": "贷款被银行拒绝，你以为是自己没钱吗？\n其实很多老板都有这个误解。\n以为做生意资金周转不通，就要到处跟朋友借钱，或者干脆放弃扩大规模。\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样。\n很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n我们先来看第一个方法。\n先整理你的公司基本资料。\n你先告诉我你公司做什么 business， operate 几年了，还有大概需要多少 funding。\n这样做是为了让顾问先了解你的规模和营运状况。\n花多少？\n这个初步的评估是免费的。\n做完这个步骤，我们就能看出你的企业真正需要的是哪一种资金支持。\n接着看第二个方法。\n深入检查你的 Financial Profile 和 Credit Record。\n有些客户以为 CTOS 或 CCRIS 有一点记录就完全没救了。\n其实我们不只是帮你找银行，而是先了解你的现有负债及融资需求。\n这样才能找出被银行拒之门外的真正卡点在哪里。\n即使之前被银行拒绝，也不代表完全没有其他选择。\n最后看第三个方法。\n规划适合你的 Financing Strategy。\n有些老板名下有产业，却不知道可以善加利用。\n比如说，利用现有产业评估 Cash Out 机会，或者是通过 Home Financing 加上 Cash Back 规划。\nCash Back 不一定是现金到手，它也可以用来做 debt consolidation，帮你减少每月 commitments。\n把这些负债重新整理好，你的现金流自然就松动了。\n以前很多老板遇到资金卡关，只会盲目去申请贷款，结果被一家接一家地 reject。\n卡在不知道问题到底出在信用记录还是融资结构不对。\n用对方法以后，我们先 study 你的 profile，再给你建议 ya。\n看看到底该用 SME Business Financing 还是 property refinancing。\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。\n没问题。Before we end the conversation，你可否跟我 share 一下你的顾虑？", "tags": "", "bait": false, "type": "Carousel", "likes": 22, "comments": 0, "er": 0.16, "followers": 13967, "date": "2026-10-09", "url": "https://www.instagram.com/p/DeQ4m77kYQK/", "video": false, "ratio": 0, "score": 0.16, "status": "未处理", "x": 0.7}, {"id": "DfHOMD1FW9i", "tracker": "VIRAL POST 竞对", "competitor": "farcapital.my", "caption": "Property deals exclusive for FAR Capital clients. 🏢🔑\n\nAcross Kuala Lumpur, Pulau Pinang and Negeri Sembilan, we’re offering a selection of deals with cashout of up to RM200,000+ and cashflow of up to RM700, many of them LTV90 friendly, with some also LPPSA friendly.\n\n(Figures shown are the maximum, “up to” cases. Cashout, cashflow and eligibility vary by property, financing and individual profile. Not a guaranteed outcome.)\n\nMissed FIRE 2026 at MITEC? Tomorrow is your best window to get access to these deals, through FIRE 2026 Online. Learn how it works, then decide for yourself. 👀\n\n📅 Part 1: TOMORROW, Saturday 31 October | 11AM–3PM\n📅 Part 2: Saturday 7 November | 11AM–3PM\n\nJoin FIRE 2026 Online for only RM60.\nRegister here: https://f.mtr.cool/mtspy8zb11", "transcript": "", "brk": "Hook类型: 数字承诺与独家资源\n结构: 抛出独家房产福利 → 解释具体数据与资质 → 引导低门槛线上参会\n为什么火: 用高额现金回撤和正向现金流直击买房投资者的核心利益。\n改编角度: 针对华人买家突出大马黄金地段置业，强调高回现与被动现金流。", "my": "很多时候，不是你借不到钱，而是还没找到适合自己的融资方式。\n\n很多中小企业老板以为，贷款被银行拒绝过，或者名下没有足够的现金流，就绝对借不到资金来做生意或周转了。\n\n其实你的 case 不是讲不能做，只是每个 customer 的情况不一样，有些可以直接申请，有些可能需要先 restructure 一会 credit profile。\n\n不一定是直接 apply loan，有时候用 property refinancing 或其他方式，可能会更适合你的情况。\n\n我们来看看可以怎么处理。\n\n第一，我们先了解你的 Financial Profile、Credit Record、现有负债及融资需求。\n这样做的目的是找出你目前在银行面额的实际卡点，而不是盲目去碰壁。\n只要你愿意配合，我们就可以一起研究有什么 solution。\n把这些基础资料整理好，接下来的每一步才会走得稳。\n\n第二，看看你名下有没有任何可以利用的产业资产。\n很多时候老板忽略了名下的资产，其实可以通过 property refinancing 评估 cash out 的机会。\nCash Back 不一定是现金到手，它也可以用来做 debt consolidation，直接帮你的企业减少每月的 commitments。\n这样一来，你的现金流压力就会减轻很多。\n\n第三，找对专业的融资规划，而不是自己去一家家银行碰运气。\n我们不只是帮你找银行，而是帮你规划更合适的 Financing Strategy。\n每个客户operate 几年、做什么 business、需要多少 funding，情况都完全不同。\n先 study 你的 profile，再给你建议，这才是对你最负责的做法。\n\n即使之前被银行拒绝，也不代表完全没有其他选择。\n关键是先了解问题出在哪里，然后选择适合自己的融资路径。\n\n以前很多老板遇到资金周转问题，只会到处去碰钉子，或者不知道自己的 Credit Record 到底卡在哪里。\n对的方法是先让专业团队了解你的情况，把 financing structure 做好调整，然后再去找合适的资金方案。\n\n有融资需求？\nWhatsApp 我们，先让我们了解你的情况。", "tags": "", "bait": false, "type": "Carousel", "likes": 21, "comments": 0, "er": 0.15, "followers": 13967, "date": "2026-10-30", "url": "https://www.instagram.com/p/DfHOMD1FW9i/", "video": false, "ratio": 0, "score": 0.15, "status": "未处理", "x": 0.7}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://kmjonwcfeissjmvdbvlj.supabase.co';
+const ANON = 'sb_publishable_-1-imvBnSnE6hE_bj2pFCQ_Hv7aqr7e';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:29 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
